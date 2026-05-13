@@ -66,7 +66,9 @@ if (Test-Path (Join-Path $InstallDir ".git")) {
     Push-Location $InstallDir
     try {
         & git fetch origin $Branch | Out-Null
+        if ($LASTEXITCODE -ne 0) { Write-Err2 "git fetch failed (exit $LASTEXITCODE)"; exit $LASTEXITCODE }
         & git reset --hard "origin/$Branch" | Out-Null
+        if ($LASTEXITCODE -ne 0) { Write-Err2 "git reset failed (exit $LASTEXITCODE)"; exit $LASTEXITCODE }
         Write-Ok "Updated to origin/$Branch"
     } finally { Pop-Location }
 } else {
@@ -76,6 +78,7 @@ if (Test-Path (Join-Path $InstallDir ".git")) {
     }
     New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
     & git clone --branch $Branch --depth 1 $repoUrl $InstallDir | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Err2 "git clone failed (exit $LASTEXITCODE)"; exit $LASTEXITCODE }
     Write-Ok "Cloned $repoUrl"
 }
 

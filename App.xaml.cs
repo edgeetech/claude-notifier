@@ -41,7 +41,9 @@ public partial class App : System.Windows.Application
         Log("Shutdown");
         _watcher?.Dispose();
         _tray?.Dispose();
-        ToastNotificationManagerCompat.Uninstall();
+        // Do NOT call ToastNotificationManagerCompat.Uninstall() here —
+        // per Microsoft docs that API is for full app uninstall and would
+        // tear down the AUMID + Action Center entries on every normal quit.
     }
 
     public static void Log(string msg)

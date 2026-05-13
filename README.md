@@ -154,13 +154,29 @@ Settings are persisted at `~/.claude/notify/config.json`.
 iwr -useb https://raw.githubusercontent.com/edgeetech/claude-notifier/main/uninstall.ps1 | iex
 ```
 
-Or manually:
+Or manually (full removal — mirrors `uninstall.ps1`):
 
 ```powershell
+# 1. Stop the app
 Get-Process ClaudeNotifier -EA SilentlyContinue | Stop-Process -Force
-Remove-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Run -Name ClaudeNotifier -EA SilentlyContinue
+
+# 2. Remove autostart
+Remove-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Run `
+                    -Name ClaudeNotifier -EA SilentlyContinue
+
+# 3. Remove install dir
 Remove-Item -Recurse -Force "$env:LOCALAPPDATA\ClaudeNotifier"
-# Then remove the Notification hook block from your Claude settings.json
+
+# 4. Remove installed hook script
+$claudeDir = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { "$env:USERPROFILE\.claude" }
+Remove-Item -Force "$claudeDir\scripts\claude-notify.ps1" -EA SilentlyContinue
+
+# 5. Drop the Notification hook block from settings.json
+#    (open "$claudeDir\settings.json" and remove the entry whose
+#     command references claude-notify.ps1)
+
+# 6. Remove notifier state (event log + config). Keep if you plan to reinstall.
+Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\notify" -EA SilentlyContinue
 ```
 
 ---

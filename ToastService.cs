@@ -1,23 +1,28 @@
 using System;
-using System.Linq;
+using System.Collections.Concurrent;
 using Microsoft.Toolkit.Uwp.Notifications;
 
 namespace ClaudeNotifier;
 
 public static class ToastService
 {
-    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, ClaudeEvent> _pending = new();
+    // Pending entries expire after this duration even if the toast was never
+    // clicked (user dismissed or let it sit in Action Center).
+    private static readonly TimeSpan PendingTtl = TimeSpan.FromMinutes(5);
+
+    private static readonly ConcurrentDictionary<string, (ClaudeEvent evt, DateTime expires)> _pending = new();
 
     public static void Show(ClaudeEvent evt)
     {
         try
         {
+            SweepExpired();
+
             var tabTag = !string.IsNullOrEmpty(evt.WtSession) && evt.WtSession.Length >= 8
                 ? evt.WtSession.Substring(0, 8) : "";
 
-            // Stash event in a small lookup so click handler can recover it
             var key = Guid.NewGuid().ToString("N");
-            _pending[key] = evt;
+            _pending[key] = (evt, DateTime.UtcNow + PendingTtl);
 
             var builder = new ToastContentBuilder()
                 .AddArgument("action", "focus")
@@ -51,11 +56,11 @@ public static class ToastService
                 args.TryGetValue("key", out var key);
                 App.Log($"Toast clicked: key={key}");
                 if (App.Config.ClickFocusesTab && !string.IsNullOrEmpty(key) &&
-                    _pending.TryRemove(key, out var evt))
+                    _pending.TryRemove(key, out var entry))
                 {
                     System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
                     {
-                        UiaTabFocus.Focus(evt);
+                        UiaTabFocus.Focus(entry.evt);
                     });
                 }
             }
@@ -63,6 +68,15 @@ public static class ToastService
         catch (Exception ex)
         {
             App.Log("Toast activation handler failed: " + ex.Message);
+        }
+    }
+
+    private static void SweepExpired()
+    {
+        var now = DateTime.UtcNow;
+        foreach (var kv in _pending)
+        {
+            if (kv.Value.expires < now) _pending.TryRemove(kv.Key, out _);
         }
     }
 }

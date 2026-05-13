@@ -74,7 +74,10 @@ if (-not (Test-Path $settingsPath)) {
         $settings.hooks | Add-Member Notification @() -Force
     }
 
-    # Replace any existing claude-notify.ps1 entries to keep things idempotent
+    # Replace any existing claude-notify.ps1 entries — this is deliberately
+    # path-agnostic so that a re-install from a different InstallDir cleans
+    # up the previous registration. If you wire a second tool literally named
+    # claude-notify.ps1 it will also be removed; rename the file in that case.
     $existing = @($settings.hooks.Notification)
     $cleaned  = @()
     foreach ($block in $existing) {

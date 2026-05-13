@@ -28,14 +28,28 @@ $evt = [pscustomobject]@{
 }
 
 $line = ($evt | ConvertTo-Json -Compress -Depth 4)
-# Atomic-ish append via .NET StreamWriter in append mode
+
+# Cross-process serialization: multiple Claude sessions may fire hooks at the
+# same time. A global named mutex prevents interleaved writes from corrupting
+# the JSONL file. Per-day file is enough granularity, so one mutex is fine.
+$mutex = $null
+$owned = $false
+try {
+    $mutex = New-Object System.Threading.Mutex($false, 'Global\ClaudeNotifier.EventWrite')
+    $owned = $mutex.WaitOne(2000)
+} catch { }
+
 try {
     $sw = [System.IO.StreamWriter]::new($file, $true, [System.Text.UTF8Encoding]::new($false))
     $sw.WriteLine($line)
     $sw.Flush()
     $sw.Dispose()
 } catch {
-    # Fallback
     Add-Content -Path $file -Value $line -Encoding utf8
+} finally {
+    if ($mutex) {
+        if ($owned) { try { $mutex.ReleaseMutex() } catch { } }
+        $mutex.Dispose()
+    }
 }
 exit 0
