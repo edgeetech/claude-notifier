@@ -1,0 +1,162 @@
+<Window x:Class="ClaudeNotifier.ParticleOverlay"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Focusable="False"
+        Width="560" Height="172">
+    <Window.Resources>
+        <!-- Color palette -->
+        <SolidColorBrush x:Key="GlassBg" Color="#E812141A" />
+
+        <!-- Glass card border gradient -->
+        <LinearGradientBrush x:Key="BorderGrad" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#66FFB347" Offset="0" />
+            <GradientStop Color="#22FFB347" Offset="0.5" />
+            <GradientStop Color="#66FFB347" Offset="1" />
+        </LinearGradientBrush>
+
+        <!-- Orb radial brush -->
+        <RadialGradientBrush x:Key="OrbBrush" GradientOrigin="0.35,0.3">
+            <GradientStop Color="#FFFFF1C2" Offset="0" />
+            <GradientStop Color="#FFFFB347" Offset="0.45" />
+            <GradientStop Color="#FFE38B16" Offset="0.85" />
+            <GradientStop Color="#FFAD5E07" Offset="1" />
+        </RadialGradientBrush>
+
+        <!-- Subtle inner highlight on glass -->
+        <LinearGradientBrush x:Key="GlassSheen" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#22FFFFFF" Offset="0" />
+            <GradientStop Color="#00FFFFFF" Offset="0.45" />
+        </LinearGradientBrush>
+    </Window.Resources>
+
+    <Grid x:Name="Root" Opacity="0">
+        <Grid.RenderTransform>
+            <TransformGroup>
+                <TranslateTransform x:Name="SlideTransform" X="60" />
+            </TransformGroup>
+        </Grid.RenderTransform>
+
+        <!-- Outer halo glow (for entrance flourish) -->
+        <Ellipse x:Name="HaloRing" Width="110" Height="110"
+                 HorizontalAlignment="Left" VerticalAlignment="Center"
+                 Margin="18,0,0,0"
+                 Stroke="#FFE38B16" StrokeThickness="2" Opacity="0">
+            <Ellipse.RenderTransform>
+                <ScaleTransform x:Name="HaloScale" CenterX="55" CenterY="55" ScaleX="1" ScaleY="1" />
+            </Ellipse.RenderTransform>
+        </Ellipse>
+        <Ellipse x:Name="HaloRing2" Width="110" Height="110"
+                 HorizontalAlignment="Left" VerticalAlignment="Center"
+                 Margin="18,0,0,0"
+                 Stroke="#FFFFB347" StrokeThickness="1.5" Opacity="0">
+            <Ellipse.RenderTransform>
+                <ScaleTransform x:Name="HaloScale2" CenterX="55" CenterY="55" ScaleX="1" ScaleY="1" />
+            </Ellipse.RenderTransform>
+        </Ellipse>
+
+        <!-- Glass card -->
+        <Border CornerRadius="20" Padding="18,14"
+                BorderThickness="1.5"
+                BorderBrush="{StaticResource BorderGrad}"
+                Background="{StaticResource GlassBg}"
+                Margin="16,16,16,16">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" BlurRadius="40" ShadowDepth="10" Opacity="0.55" />
+            </Border.Effect>
+
+            <Grid>
+                <!-- Inner glass sheen -->
+                <Border CornerRadius="22" Background="{StaticResource GlassSheen}" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Orb + ripple stack -->
+                    <Grid Grid.Column="0" Width="92" Height="92" Margin="0,0,18,0"
+                          VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Ellipse x:Name="Ripple1" Width="70" Height="70"
+                                 Stroke="#FFE38B16" StrokeThickness="1.8" Opacity="0">
+                            <Ellipse.RenderTransform>
+                                <ScaleTransform x:Name="Ripple1Scale" CenterX="35" CenterY="35" />
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                        <Ellipse x:Name="Ripple2" Width="70" Height="70"
+                                 Stroke="#FFFFB347" StrokeThickness="1.3" Opacity="0">
+                            <Ellipse.RenderTransform>
+                                <ScaleTransform x:Name="Ripple2Scale" CenterX="35" CenterY="35" />
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                        <Ellipse Width="92" Height="92" Opacity="0.4">
+                            <Ellipse.Fill>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="#80FFB347" Offset="0" />
+                                    <GradientStop Color="#00FFB347" Offset="0.7" />
+                                </RadialGradientBrush>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                        <Ellipse Width="58" Height="58" Fill="{StaticResource OrbBrush}">
+                            <Ellipse.Effect>
+                                <DropShadowEffect Color="#FFE38B16" BlurRadius="26" ShadowDepth="0" Opacity="0.9" />
+                            </Ellipse.Effect>
+                            <Ellipse.RenderTransform>
+                                <ScaleTransform x:Name="OrbScale" CenterX="29" CenterY="29" />
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                        <Ellipse Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                 Margin="22,22,0,0" Opacity="0.8">
+                            <Ellipse.Fill>
+                                <RadialGradientBrush GradientOrigin="0.3,0.3">
+                                    <GradientStop Color="#FFFFFFFF" Offset="0" />
+                                    <GradientStop Color="#00FFFFFF" Offset="1" />
+                                </RadialGradientBrush>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                    </Grid>
+
+                    <!-- Right text block -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <!-- Eyebrow label -->
+                        <StackPanel x:Name="EyebrowRow" Orientation="Horizontal" Opacity="0">
+                            <Border Width="6" Height="6" CornerRadius="3" Background="#FFE38B16"
+                                    VerticalAlignment="Center" Margin="0,0,8,0">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#FFE38B16" BlurRadius="8" ShadowDepth="0" />
+                                </Border.Effect>
+                            </Border>
+                            <TextBlock Text="CLAUDE"
+                                       Foreground="#FFE38B16" FontWeight="SemiBold"
+                                       FontSize="11" FontFamily="Segoe UI" />
+                            <TextBlock Text="   ·   AWAITING APPROVAL"
+                                       Foreground="#FFB89060" FontSize="11" FontWeight="SemiBold"
+                                       FontFamily="Segoe UI" />
+                        </StackPanel>
+
+                        <TextBlock x:Name="TitleText" Margin="0,4,0,0"
+                                   Text="Tool requires permission"
+                                   Foreground="#FFFAFAFA" FontSize="17" FontWeight="Light"
+                                   FontFamily="Segoe UI" Opacity="0" />
+                        <TextBlock x:Name="MessageText" Margin="0,2,0,0"
+                                   Foreground="#FFCDCDD3" FontSize="12" TextWrapping="Wrap"
+                                   MaxWidth="360" FontFamily="Segoe UI" Opacity="0" TextTrimming="CharacterEllipsis" />
+                        <Border Margin="0,10,0,0" Padding="8,3" CornerRadius="6"
+                                Background="#22FFB347" BorderBrush="#55FFB347" BorderThickness="1"
+                                HorizontalAlignment="Left" x:Name="TabPill" Opacity="0">
+                            <TextBlock x:Name="TabText"
+                                       Foreground="#FFFFC78A" FontSize="10"
+                                       FontFamily="Cascadia Mono, Consolas, monospace" />
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
