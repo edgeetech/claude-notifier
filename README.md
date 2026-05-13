@@ -106,7 +106,9 @@ The installer will:
 5. Register a `HKCU\...\Run` autostart entry
 6. Launch the app — look for the spark icon in the system tray
 
-If you keep your Claude config in a non-default location, set `CLAUDE_CONFIG_DIR` first, then run the installer. The installer respects that variable.
+If you keep your Claude config in a non-default location, set `CLAUDE_CONFIG_DIR` first, then run the installer. The installer, the hook, the tray app, and the uninstaller all honor it consistently — settings, events, logs, and config land under the same root.
+
+> **Note:** for autostart to pick up `CLAUDE_CONFIG_DIR`, persist it with `setx CLAUDE_CONFIG_DIR "C:\path\to\.claude"`. Process-scoped values aren't visible to the `HKCU\...\Run` shell that spawns the tray app at logon.
 
 ### Manual install
 

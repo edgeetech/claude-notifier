@@ -57,9 +57,11 @@ Write-Step "Removing install dir"
 if (Test-Path $InstallDir) { Remove-Item -Recurse -Force $InstallDir; Write-Ok "Deleted $InstallDir" }
 else { Write-Warn2 "Install dir not present" }
 
+$claudeRoot = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $env:USERPROFILE ".claude" }
+$eventDir   = Join-Path $claudeRoot "notify"
+
 if (-not $KeepEvents) {
     Write-Step "Removing event logs"
-    $eventDir = Join-Path $env:USERPROFILE ".claude\notify"
     if (Test-Path $eventDir) {
         Get-ChildItem $eventDir -Filter "events-*.jsonl" -EA SilentlyContinue | Remove-Item -Force -EA SilentlyContinue
         Remove-Item -Force (Join-Path $eventDir "notifier.log") -EA SilentlyContinue
@@ -67,7 +69,7 @@ if (-not $KeepEvents) {
     }
 }
 if (-not $KeepConfig) {
-    $cfg = Join-Path $env:USERPROFILE ".claude\notify\config.json"
+    $cfg = Join-Path $eventDir "config.json"
     if (Test-Path $cfg) { Remove-Item -Force $cfg; Write-Ok "config.json deleted (use -KeepConfig to skip)" }
 }
 

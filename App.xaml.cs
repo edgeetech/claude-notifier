@@ -7,8 +7,19 @@ namespace ClaudeNotifier;
 
 public partial class App : System.Windows.Application
 {
-    public static string EventDir { get; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".claude", "notify");
+    public static string EventDir { get; } = ResolveEventDir();
+
+    private static string ResolveEventDir()
+    {
+        // Honor CLAUDE_CONFIG_DIR so install, hook, and app all agree on roots.
+        // Fallback: %USERPROFILE%\.claude
+        var configDir = Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR");
+        if (string.IsNullOrWhiteSpace(configDir))
+        {
+            configDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".claude");
+        }
+        return Path.Combine(configDir, "notify");
+    }
 
     public static string LogPath { get; } = Path.Combine(EventDir, "notifier.log");
 

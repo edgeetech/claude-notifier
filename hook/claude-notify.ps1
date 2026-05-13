@@ -11,7 +11,9 @@ try {
     $raw = [Console]::In.ReadToEnd()
 } catch { $raw = "" }
 
-$dir = Join-Path $env:USERPROFILE ".claude\notify"
+# Honor CLAUDE_CONFIG_DIR so events land in the same root the app watches.
+$claudeRoot = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $env:USERPROFILE ".claude" }
+$dir = Join-Path $claudeRoot "notify"
 if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
 $file = Join-Path $dir ("events-" + (Get-Date -Format "yyyyMMdd") + ".jsonl")
 

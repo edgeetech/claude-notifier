@@ -82,7 +82,14 @@ if (Test-Path (Join-Path $InstallDir ".git")) {
     Write-Ok "Cloned $repoUrl"
 }
 
-# --- 3. Build ---
+# --- 3. Stop any running instance BEFORE build, otherwise the OS will hold
+#       a file lock on bin\Release\...\ClaudeNotifier.exe (MSB3021/MSB3027).
+Write-Step "Stopping running instance (if any)"
+Get-Process ClaudeNotifier -EA SilentlyContinue | Stop-Process -Force -EA SilentlyContinue
+Start-Sleep -Milliseconds 300
+Write-Ok "No live instance holding the output path"
+
+# --- 4. Build ---
 Write-Step "Building (dotnet build -c Release)"
 Push-Location $InstallDir
 try {
