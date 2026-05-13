@@ -41,6 +41,20 @@ This tray app listens for Claude's permission events and surfaces them with soun
 
 ---
 
+## Screenshots
+
+### Particles
+Glassmorphic card, glowing orb, expanding ripple rings, animated entrance from the right.
+
+![Particles overlay](docs/screenshots/particles-overlay.png)
+
+### Led Bar
+Full-width pulsing amber bar at the top of the screen with a glass card sliding down underneath.
+
+![Led Bar overlay](docs/screenshots/ledbar-overlay.png)
+
+---
+
 ## How it works
 
 ```
