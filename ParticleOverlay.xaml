@@ -132,12 +132,9 @@
                                     <DropShadowEffect Color="#FFE38B16" BlurRadius="8" ShadowDepth="0" />
                                 </Border.Effect>
                             </Border>
-                            <TextBlock Text="CLAUDE"
+                            <TextBlock x:Name="EyebrowText" Text="CLAUDE   ·   AWAITING APPROVAL"
                                        Foreground="#FFE38B16" FontWeight="SemiBold"
                                        FontSize="11" FontFamily="Segoe UI" />
-                            <TextBlock Text="   ·   AWAITING APPROVAL"
-                                       Foreground="#FFB89060" FontSize="11" FontWeight="SemiBold"
-                                       FontFamily="Segoe UI" />
                         </StackPanel>
 
                         <TextBlock x:Name="TitleText" Margin="0,4,0,0"

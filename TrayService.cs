@@ -82,7 +82,7 @@ public class TrayService : IDisposable
         var dismissAllItem = new ToolStripMenuItem("Dismiss all open overlays");
         dismissAllItem.Click += (s, e) => OverlayService.DismissAll();
 
-        var testItem = new ToolStripMenuItem("Test notification");
+        var testItem = new ToolStripMenuItem("Test notification (permission)");
         testItem.Click += (s, e) =>
         {
             var fake = new ClaudeEvent(
@@ -91,9 +91,28 @@ public class TrayService : IDisposable
                 Cwd: Environment.CurrentDirectory,
                 Message: "Claude needs your permission to use Bash",
                 SessionId: "test", ToolName: "Bash",
-                TabTitle: null);
+                TabTitle: null, Kind: "permission");
             EventFilter.HandleEvent(fake);
         };
+
+        var testIdleItem = new ToolStripMenuItem("Test notification (idle)");
+        testIdleItem.Click += (s, e) =>
+        {
+            var fake = new ClaudeEvent(
+                Ts: DateTime.Now, Pid: 0,
+                WtSession: Environment.GetEnvironmentVariable("WT_SESSION") ?? "00000000-0000-0000-0000-000000000000",
+                Cwd: Environment.CurrentDirectory,
+                Message: "Claude is waiting for your input",
+                SessionId: "test-idle", ToolName: null,
+                TabTitle: null, Kind: "idle");
+            EventFilter.HandleEvent(fake);
+        };
+
+        var notifyPermItem = new ToolStripMenuItem("Notify on permission prompts") { Checked = App.Config.NotifyOnPermission, CheckOnClick = true };
+        notifyPermItem.CheckedChanged += (s, e) => { App.Config.NotifyOnPermission = notifyPermItem.Checked; App.Config.Save(); };
+
+        var notifyIdleItem = new ToolStripMenuItem("Notify on idle (Claude waiting)") { Checked = App.Config.NotifyOnIdle, CheckOnClick = true };
+        notifyIdleItem.CheckedChanged += (s, e) => { App.Config.NotifyOnIdle = notifyIdleItem.Checked; App.Config.Save(); };
 
         var openLogItem = new ToolStripMenuItem("Open log");
         openLogItem.Click += (s, e) =>
@@ -116,6 +135,9 @@ public class TrayService : IDisposable
         menu.Items.Add(snoozeMenu);
         menu.Items.Add(dismissAllItem);
         menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(notifyPermItem);
+        menu.Items.Add(notifyIdleItem);
+        menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(soundItem);
         menu.Items.Add(overlayItem);
         menu.Items.Add(styleMenu);
@@ -123,6 +145,7 @@ public class TrayService : IDisposable
         menu.Items.Add(clickFocusItem);
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(testItem);
+        menu.Items.Add(testIdleItem);
         menu.Items.Add(openLogItem);
         menu.Items.Add(openDirItem);
         menu.Items.Add(new ToolStripSeparator());

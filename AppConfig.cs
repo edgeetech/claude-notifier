@@ -11,6 +11,12 @@ public class AppConfig
     public bool ShowOverlay { get; set; } = true;
     public bool ShowToast { get; set; } = false;        // off by default; user disliked duplicate
     public bool ClickFocusesTab { get; set; } = true;
+
+    // Per-kind notification gates. Sessions running with skipAutoPermissionPrompt: true
+    // auto-approve tools, so users will only see "idle_prompt" events from Claude.
+    public bool NotifyOnPermission { get; set; } = true;
+    public bool NotifyOnIdle { get; set; } = true;
+
     public int DedupeWindowMs { get; set; } = 3000;
     public string SoundFile { get; set; } = @"%WINDIR%\Media\Windows Notify.wav";
 

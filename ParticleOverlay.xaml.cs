@@ -24,9 +24,8 @@ public partial class ParticleOverlay : Window, IOverlayWindow
         InitializeComponent();
         _evt = evt;
 
-        // Tool name as title; full message as subtitle
-        var tool = evt.ToolName ?? "Tool";
-        TitleText.Text = $"Permission needed for {tool}";
+        EyebrowText.Text = evt.DisplayEyebrow;
+        TitleText.Text = evt.DisplayTitle;
         MessageText.Text = evt.Message;
         var tag = !string.IsNullOrEmpty(evt.WtSession) && evt.WtSession.Length >= 8
             ? evt.WtSession.Substring(0, 8) : "?";

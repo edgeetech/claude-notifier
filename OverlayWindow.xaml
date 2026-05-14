@@ -60,7 +60,7 @@
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="Claude needs approval"
+                    <TextBlock x:Name="TitleText" Text="Claude needs approval"
                                Foreground="#FFFAFAFA" FontSize="18" FontWeight="SemiBold" />
                     <TextBlock x:Name="MessageText" Margin="0,4,0,0"
                                Foreground="#FFCCCCCC" FontSize="13" TextWrapping="Wrap" />

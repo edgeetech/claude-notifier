@@ -24,6 +24,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         InitializeComponent();
         _evt = evt;
+        TitleText.Text = evt.Kind == "idle" ? "Claude is waiting" : "Claude needs approval";
         MessageText.Text = evt.Message;
         var tag = !string.IsNullOrEmpty(evt.WtSession) && evt.WtSession.Length >= 8
             ? evt.WtSession.Substring(0, 8) : "?";

@@ -23,6 +23,7 @@ public partial class LedBarOverlay : Window, IOverlayWindow
         InitializeComponent();
         _evt = evt;
 
+        EyebrowText.Text = evt.DisplayEyebrow;
         MessageText.Text = evt.Message;
         var tag = !string.IsNullOrEmpty(evt.WtSession) && evt.WtSession.Length >= 8
             ? evt.WtSession.Substring(0, 8) : "?";

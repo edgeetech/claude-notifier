@@ -14,7 +14,23 @@ public record ClaudeEvent(
     string Message,
     string? SessionId,
     string? ToolName,
-    string? TabTitle);
+    string? TabTitle,
+    string Kind)  // "permission" | "idle" | "other"
+{
+    public string DisplayTitle => Kind switch
+    {
+        "permission" => string.IsNullOrEmpty(ToolName) ? "Permission needed" : $"Permission needed for {ToolName}",
+        "idle"       => "Claude is waiting for you",
+        _            => "Claude notification"
+    };
+
+    public string DisplayEyebrow => Kind switch
+    {
+        "permission" => "CLAUDE   ·   AWAITING APPROVAL",
+        "idle"       => "CLAUDE   ·   AWAITING REPLY",
+        _            => "CLAUDE"
+    };
+}
 
 public class EventWatcher : IDisposable
 {
@@ -84,6 +100,7 @@ public class EventWatcher : IDisposable
             string? message = null;
             string? sessionId = null;
             string? toolName = null;
+            string? notifType = null;
 
             if (root.TryGetProperty("payload", out var payloadEl))
             {
@@ -96,16 +113,26 @@ public class EventWatcher : IDisposable
                         var p = pdoc.RootElement;
                         if (p.TryGetProperty("message", out var m)) message = m.GetString();
                         if (p.TryGetProperty("session_id", out var s)) sessionId = s.GetString();
+                        if (p.TryGetProperty("notification_type", out var nt)) notifType = nt.GetString();
                     }
                     catch { }
                 }
             }
 
-            // Parse tool name from "Claude needs your permission to use <Tool>"
+            const string permPrefix = "Claude needs your permission to use ";
+            string kind = "other";
             if (!string.IsNullOrEmpty(message))
             {
-                const string prefix = "Claude needs your permission to use ";
-                if (message.StartsWith(prefix)) toolName = message.Substring(prefix.Length).Trim();
+                if (message.StartsWith(permPrefix))
+                {
+                    kind = "permission";
+                    toolName = message.Substring(permPrefix.Length).Trim();
+                }
+                else if (notifType == "idle_prompt" ||
+                         message.IndexOf("waiting for your input", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    kind = "idle";
+                }
             }
 
             var evt = new ClaudeEvent(
@@ -116,7 +143,8 @@ public class EventWatcher : IDisposable
                 Message: message ?? "",
                 SessionId: sessionId,
                 ToolName: toolName,
-                TabTitle: root.TryGetProperty("tab_title", out var tt) ? tt.GetString() : null);
+                TabTitle: root.TryGetProperty("tab_title", out var tt) ? tt.GetString() : null,
+                Kind: kind);
 
             OnEvent?.Invoke(evt);
         }

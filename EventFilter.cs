@@ -18,11 +18,18 @@ public static class EventFilter
             return;
         }
 
-        // Permission-only filter
-        if (string.IsNullOrEmpty(evt.ToolName)) return;
+        // Kind filter: respect per-kind config toggles
+        bool accept = evt.Kind switch
+        {
+            "permission" => App.Config.NotifyOnPermission,
+            "idle"       => App.Config.NotifyOnIdle,
+            _            => false
+        };
+        if (!accept) return;
 
-        // Dedupe: same session + tool within window
-        var key = $"{evt.SessionId ?? evt.WtSession ?? evt.Pid.ToString()}|{evt.ToolName}";
+        // Dedupe key uses Kind + ToolName so an idle prompt doesn't suppress a follow-up permission.
+        var keyId = evt.SessionId ?? evt.WtSession ?? evt.Pid.ToString();
+        var key   = $"{keyId}|{evt.Kind}|{evt.ToolName}";
         lock (_lock)
         {
             var now = DateTime.UtcNow;
@@ -42,7 +49,7 @@ public static class EventFilter
             }
         }
 
-        App.Log($"FIRE  tool={evt.ToolName} wt={evt.WtSession} pid={evt.Pid} cwd={evt.Cwd}");
+        App.Log($"FIRE  kind={evt.Kind} tool={evt.ToolName} wt={evt.WtSession} pid={evt.Pid} cwd={evt.Cwd}");
 
         // Hop to UI thread for sound/overlay/toast
         System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>

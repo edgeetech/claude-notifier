@@ -24,10 +24,11 @@ public static class ToastService
             var key = Guid.NewGuid().ToString("N");
             _pending[key] = (evt, DateTime.UtcNow + PendingTtl);
 
+            var title = evt.Kind == "idle" ? "Claude is waiting" : "Claude needs approval";
             var builder = new ToastContentBuilder()
                 .AddArgument("action", "focus")
                 .AddArgument("key", key)
-                .AddText("Claude needs approval")
+                .AddText(title)
                 .AddText(evt.Message);
 
             if (!string.IsNullOrEmpty(evt.Cwd))
